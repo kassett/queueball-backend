@@ -51,6 +51,9 @@ features = ["dev"]
 post-install-commands = [
 #    "pip install -e .",  # Uncomment for a CLI tool
 ]
+type = "virtual"
+installer = "uv"
+path = ".venv"
 
 [tool.hatch.envs.default.env-vars]
 PYTHONPATH = "src"
