@@ -1,0 +1,81 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch]
+root = "src"
+
+[tool.hatch.version]
+path = "src/queueball/__init__.py"
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[project]
+name = "queueball"
+description = "Server for QueueBall app."
+authors = [
+    {name = "kassett"}
+]
+requires-python = ">=3.12"
+dynamic = ["version"]
+
+dependencies = [
+    "alembic",
+    "click",
+    "cryptography",
+    "fastapi",
+    "mysql-connector-python",
+    "PyMySQL",
+    "requests",
+    "sqlalchemy",
+    "uvicorn",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest-env>=1.1.3",
+    "pytest>=7.1.2",
+    "pytest-xdist>=3.5.0",
+    "pytest-asyncio>=0.15.1",
+]
+
+# Make these scripts available during development with `hatch run pip install -e .`
+[project.scripts]
+#queueball = "queueball.cli:cli"
+
+[tool.hatch.envs.default]
+dev-mode = true
+python = "3.12"
+features = ["dev"]
+post-install-commands = [
+#    "pip install -e .",  # Uncomment for a CLI tool
+]
+
+[tool.hatch.envs.default.env-vars]
+PYTHONPATH = "src"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/queueball"]
+
+[tool.ruff]
+line-length = 90
+target-version = "py312"
+
+[tool.ruff.format]
+docstring-code-format = true
+docstring-code-line-length = 80
+
+[tool.pytest.ini_options]
+env = [
+    "AWS_ENDPOINT_URL=http://localhost:4567",
+    "AWS_ACCESS_KEY_ID=localstack",
+    "AWS_SECRET_ACCESS_KEY=localstack",
+    "AWS_DEFAULT_REGION=us-east-1",
+    "AWS_CREDENTIAL_EXPIRATION=3000-01-01T00:00:00Z",
+]
+pythonpath = "src"
+filterwarnings = [
+    "ignore::DeprecationWarning:graphql.pyutils",
+    "ignore::DeprecationWarning:botocore"
+]
