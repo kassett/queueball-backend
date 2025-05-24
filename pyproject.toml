@@ -26,6 +26,7 @@ dependencies = [
     "cryptography",
     "fastapi",
     "mysql-connector-python",
+    "pydantic-settings",
     "PyMySQL",
     "requests",
     "sqlalchemy",
@@ -42,21 +43,25 @@ dev = [
 
 # Make these scripts available during development with `hatch run pip install -e .`
 [project.scripts]
-#queueball = "queueball.cli:cli"
+queueball = "queueball.operations.cli:cli"
 
 [tool.hatch.envs.default]
 dev-mode = true
 python = "3.12"
 features = ["dev"]
 post-install-commands = [
-#    "pip install -e .",  # Uncomment for a CLI tool
+    "uv pip install -e .",  # Uncomment for a CLI tool
 ]
 type = "virtual"
 installer = "uv"
 path = ".venv"
 
+[tool.hatch.envs.default.scripts]
+api = "uvicorn queueball.api.server:app --host 0.0.0.0 --port 5000 --reload"
+
 [tool.hatch.envs.default.env-vars]
 PYTHONPATH = "src"
+QUEUEBALL_DB_URI = "mysql://queueball:queueball@localhost:3306/queueball"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/queueball"]
@@ -69,6 +74,15 @@ target-version = "py312"
 docstring-code-format = true
 docstring-code-line-length = 80
 
+[tool.ruff.lint]
+flake8-quotes = {inline-quotes = "double", multiline-quotes = "double"}
+mccabe = { max-complexity = 20 }
+
+[tool.ruff.lint.isort]
+known-first-party = ["manifest", "tests", "pbm_demo"]
+known-third-party = ["wandb"]
+
+
 [tool.pytest.ini_options]
 env = [
     "AWS_ENDPOINT_URL=http://localhost:4567",
@@ -76,6 +90,8 @@ env = [
     "AWS_SECRET_ACCESS_KEY=localstack",
     "AWS_DEFAULT_REGION=us-east-1",
     "AWS_CREDENTIAL_EXPIRATION=3000-01-01T00:00:00Z",
+    "QUEUEBALL_DB_URI=mysql://queueball:queueball@localhost:3306/queueball"
+
 ]
 pythonpath = "src"
 filterwarnings = [

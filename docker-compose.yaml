@@ -1,0 +1,32 @@
+services:
+  
+  mysql:
+    image: mysql:9.2
+    hostname: mysql
+    container_name: mysql
+    ports:
+      - "3306:3306"
+    command: [ "mysqld", "--log-bin-trust-function-creators=1" ]
+    healthcheck:
+      test: mysqladmin ping -h 127.0.0.1 -u $$MYSQL_USER --password=$$MYSQL_PASSWORD
+      start_period: 1s
+      interval: 5s
+      timeout: 5s
+      retries: 55
+    environment:
+      MYSQL_ROOT_PASSWORD: queueball
+      MYSQL_DATABASE: queueball
+      MYSQL_USER: queueball
+      MYSQL_PASSWORD: queueball
+    networks:
+      - queueball
+
+  wait:
+    image: hello-world:latest
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+networks:
+  queueball:
+    driver: bridge
