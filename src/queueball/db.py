@@ -1,6 +1,17 @@
 from datetime import datetime
 
-from sqlalchemy import TIMESTAMP, Integer, MetaData, String, func, text
+from sqlalchemy import (
+    TIMESTAMP,
+    Integer,
+    MetaData,
+    String,
+    func,
+    text,
+    ForeignKey,
+    CheckConstraint,
+    Computed,
+    Boolean,
+)
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
@@ -46,7 +57,7 @@ class User(Base):
 class Hall(Base):
     __tablename__ = "halls"
 
-    id: Mapped[str] = mapped_column(
+    id: Mapped[int] = mapped_column(
         Integer(), primary_key=True, nullable=False, autoincrement=True
     )
     name: Mapped[str] = mapped_column(String(100), index=True, nullable=False)
@@ -56,3 +67,65 @@ class Hall(Base):
     qr_code_url: Mapped[str] = mapped_column(
         String(255), nullable=False
     )  # Will be an S3 URL
+
+
+class Table(Base):
+    __tablename__ = "tables"
+
+    id: Mapped[int] = mapped_column(
+        Integer(), primary_key=True, nullable=False, autoincrement=True
+    )
+    description: Mapped[str | None] = mapped_column(String(60), nullable=True)
+
+
+class Team(Base):
+    __tablename__ = "teams"
+
+    id: Mapped[int] = mapped_column(
+        Integer(), primary_key=True, nullable=False, autoincrement=True
+    )
+    nickname: Mapped[str | None] = mapped_column(String(30), nullable=True)
+    player1_id: Mapped[str] = mapped_column(String(100), nullable=False)
+    player2_id: Mapped[str | None] = mapped_column(String(100), nullable=True)
+
+    # Generated column: True if player2 is NULL
+    individual: Mapped[bool] = mapped_column(
+        Boolean,
+        Computed("player2_id IS NULL", persisted=True),  # Use 'stored=True' for MySQL
+    )
+
+    __table_args__ = (
+        CheckConstraint(
+            "player2_id IS NULL OR player1_id < player2_id",
+            name="player1_id_less_than_player2_id",
+        ),
+    )
+
+
+class Line(Base):
+    __tablename__ = "lines"
+
+    id: Mapped[int] = mapped_column(
+        Integer(), primary_key=True, nullable=False, autoincrement=True
+    )
+    hall_id: Mapped[int] = mapped_column(Integer(), ForeignKey(Hall.id), nullable=False)
+    team_id: Mapped[int] = mapped_column(Integer(), ForeignKey(Team.id), nullable=False)
+    position: Mapped[int] = mapped_column(Integer(), nullable=False)
+
+
+class Game(Base):
+    __tablename__ = "games"
+
+    id: Mapped[str] = mapped_column(
+        Integer(), nullable=False, autoincrement=True, primary_key=True
+    )
+    table_id: Mapped[int] = mapped_column(Integer(), ForeignKey(Table.id), nullable=False)
+    incumbent_team_id: Mapped[int] = mapped_column(
+        Integer(), ForeignKey(Team.id), nullable=False
+    )
+    contender_team_id: Mapped[int] = mapped_column(
+        Integer(), ForeignKey(Team.id), nullable=False
+    )
+    winner_team_id: Mapped[int] = mapped_column(
+        Integer(), ForeignKey(Team.id), nullable=True
+    )

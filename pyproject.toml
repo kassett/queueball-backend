@@ -57,7 +57,7 @@ installer = "uv"
 path = ".venv"
 
 [tool.hatch.envs.default.scripts]
-api = "uvicorn queueball.api.server:app --host 0.0.0.0 --port 5000 --reload"
+api = "uvicorn queueball.api.server:app --host 127.0.0.1 --port 5000 --reload"
 
 [tool.hatch.envs.default.env-vars]
 PYTHONPATH = "src"

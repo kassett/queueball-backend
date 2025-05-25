@@ -31,7 +31,7 @@ async def db_session_middleware(request: Request, call_next):
         return await call_next(request)
 
 
-@app.middleware("http")
+# @app.middleware("http")
 async def add_or_create_user(request: Request, call_next):
     """Add the current user to the context.
 
